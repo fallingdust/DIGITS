@@ -147,7 +147,7 @@ class GroundTruth:
                     if len(row) == 0:
                         # This can happen when you open an empty file
                         continue
-                    if len(row) < 15:
+                    if len(row) < 6:
                         raise ValueError('Invalid label format in "%s"'
                                          % os.path.join(self.label_dir, label_file))
 
@@ -165,7 +165,7 @@ class GroundTruth:
                         if not all(x >= self.min_box_size for x in box_dimensions):
                             # object is smaller than threshold => set to "DontCare"
                             gt.stype = ''
-                            gt.object = ObjectType.Dontcare
+                            gt.object = 0
                     objects_per_image.append(gt)
                 key = os.path.splitext(label_file)[0]
                 self.update_objects_all(key, objects_per_image)

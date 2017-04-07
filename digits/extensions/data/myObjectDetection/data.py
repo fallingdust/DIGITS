@@ -5,8 +5,6 @@ import csv
 import operator
 import os
 import random
-import StringIO
-
 import numpy as np
 
 import digits
