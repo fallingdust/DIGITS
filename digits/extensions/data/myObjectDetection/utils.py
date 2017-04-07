@@ -142,8 +142,10 @@ class GroundTruth:
             raise RuntimeError('error: no label files found in %s' % self.label_dir)
         for label_file in files:
             objects_per_image = list()
-            with open(os.path.join(self.label_dir, label_file), 'rb') as flabel:
-                for row in csv.reader(flabel, delimiter=self.label_delimiter):
+            with open(os.path.join(self.label_dir, label_file)) as flabel:
+                lines = [line.strip() for line in flabel.readlines() if line.strip()]
+                for line in lines:
+                    row = line.split(self.label_delimiter)
                     if len(row) == 0:
                         # This can happen when you open an empty file
                         continue
