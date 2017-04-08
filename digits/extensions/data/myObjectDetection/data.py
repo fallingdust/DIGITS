@@ -1,7 +1,7 @@
 # Copyright (c) 2016-2017, NVIDIA CORPORATION.  All rights reserved.
 from __future__ import absolute_import
 
-import csv
+import cv2
 import operator
 import os
 import random
@@ -96,6 +96,12 @@ class DataIngestion(DataIngestionInterface):
         if label_id not in self.datasrc_annotation_dict:
             raise ValueError("Label key %s not found in label folder" % label_id)
         annotations = self.datasrc_annotation_dict[label_id]
+        rotate = self.datasrc_rotate_dict[label_id]
+
+        # rotate the image if necessary
+        if rotate != 0:
+            rot_mat = cv2.getRotationMatrix2D((img.shape[1] / 2, img.shape[0] / 2), rotate, 1)
+            img = cv2.warpAffine(img, rot_mat, (img.shape[1], img.shape[0]))
 
         # collect bbox list into bboxList
         bboxList = []
@@ -202,6 +208,7 @@ class DataIngestion(DataIngestionInterface):
             class_mappings=self.class_mappings)
         datasrc.load_gt_obj()
         self.datasrc_annotation_dict = datasrc.objects_all
+        self.datasrc_rotate_dict = datasrc.rotate_all
 
         scene_files = []
         for key in self.datasrc_annotation_dict:

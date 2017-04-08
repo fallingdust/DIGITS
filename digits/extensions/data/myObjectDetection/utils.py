@@ -124,6 +124,7 @@ class GroundTruth:
         self.label_ext = label_ext  # extension of label files
         self.label_delimiter = label_delimiter  # space is used as delimiter in label files
         self._objects_all = dict()  # positive bboxes across images
+        self.rotate_all = dict()
         self.min_box_size = min_box_size
 
         GroundTruthObj.OBJECT_TYPES = class_mappings
@@ -144,32 +145,35 @@ class GroundTruth:
             objects_per_image = list()
             with open(os.path.join(self.label_dir, label_file)) as flabel:
                 lines = [line.strip() for line in flabel.readlines() if line.strip()]
-                for line in lines:
-                    row = line.split(self.label_delimiter)
-                    if row[0] == 'rotate':
-                        continue
-                    if len(row) < 6:
-                        raise ValueError('Invalid label format in "%s"'
-                                         % os.path.join(self.label_dir, label_file))
+            rotate = 0
+            for line in lines:
+                row = line.split(self.label_delimiter)
+                if row[0] == 'rotate':
+                    rotate = int(row[1])
+                    continue
+                if len(row) < 6:
+                    raise ValueError('Invalid label format in "%s"'
+                                     % os.path.join(self.label_dir, label_file))
 
-                    # load data
-                    gt = GroundTruthObj()
-                    gt.stype = row[0].lower()
-                    gt.bbox.xl = float(row[1])
-                    gt.bbox.yt = float(row[2])
-                    gt.bbox.xr = float(row[3])
-                    gt.bbox.yb = float(row[4])
-                    gt.truncated = float(row[5])
-                    gt.set_type()
-                    box_dimensions = [gt.bbox.xr - gt.bbox.xl, gt.bbox.yb - gt.bbox.yt]
-                    if self.min_box_size is not None:
-                        if not all(x >= self.min_box_size for x in box_dimensions):
-                            # object is smaller than threshold => set to "DontCare"
-                            gt.stype = ''
-                            gt.object = 0
-                    objects_per_image.append(gt)
-                key = os.path.splitext(label_file)[0]
-                self.update_objects_all(key, objects_per_image)
+                # load data
+                gt = GroundTruthObj()
+                gt.stype = row[0].lower()
+                gt.bbox.xl = float(row[1])
+                gt.bbox.yt = float(row[2])
+                gt.bbox.xr = float(row[3])
+                gt.bbox.yb = float(row[4])
+                gt.truncated = float(row[5])
+                gt.set_type()
+                box_dimensions = [gt.bbox.xr - gt.bbox.xl, gt.bbox.yb - gt.bbox.yt]
+                if self.min_box_size is not None:
+                    if not all(x >= self.min_box_size for x in box_dimensions):
+                        # object is smaller than threshold => set to "DontCare"
+                        gt.stype = ''
+                        gt.object = 0
+                objects_per_image.append(gt)
+            key = os.path.splitext(label_file)[0]
+            self.rotate_all[key] = rotate
+            self.update_objects_all(key, objects_per_image)
 
     @property
     def objects_all(self):
