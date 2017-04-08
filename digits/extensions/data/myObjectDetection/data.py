@@ -100,8 +100,10 @@ class DataIngestion(DataIngestionInterface):
 
         # rotate the image if necessary
         if rotate != 0:
+            img = img.transpose(1, 2, 0)
             rot_mat = cv2.getRotationMatrix2D((img.shape[1] / 2, img.shape[0] / 2), rotate, 1)
             img = cv2.warpAffine(img, rot_mat, (img.shape[1], img.shape[0]))
+            img = img.transpose(2, 0, 1)
 
         # collect bbox list into bboxList
         bboxList = []
