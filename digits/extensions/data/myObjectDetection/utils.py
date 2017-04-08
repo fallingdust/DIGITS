@@ -146,8 +146,7 @@ class GroundTruth:
                 lines = [line.strip() for line in flabel.readlines() if line.strip()]
                 for line in lines:
                     row = line.split(self.label_delimiter)
-                    if len(row) == 0:
-                        # This can happen when you open an empty file
+                    if row[0] == 'rotate':
                         continue
                     if len(row) < 6:
                         raise ValueError('Invalid label format in "%s"'
